@@ -62,8 +62,8 @@ export default function DashboardPage() {
             {/* Kartu Statistik */}
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <StatCard title="Pengajuan" value={isLoading ? '...' : stats?.total_pengajuan ?? 0} icon={FilePlus2} />
-                <StatCard title="Sudah ACC" value={isLoading ? '...' : stats?.sudah_acc ?? 0} icon={CheckCircle2} />
-                <StatCard title="Tolak ACC" value={isLoading ? '...' : stats?.tolak_acc ?? 0} icon={XCircle} />
+                <StatCard title="Diterima" value={isLoading ? '...' : stats?.sudah_acc ?? 0} icon={CheckCircle2} />
+                <StatCard title="Ditolak" value={isLoading ? '...' : stats?.tolak_acc ?? 0} icon={XCircle} />
                 <StatCard title="Perbaikan" value={isLoading ? '...' : stats?.perbaikan ?? 0} icon={RefreshCw} />
             </div>
 

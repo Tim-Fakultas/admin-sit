@@ -9,10 +9,12 @@ const apiClient = axios.create({
     }
 });
 
-// Interceptor: Kode ini akan berjalan sebelum setiap request dikirim
+// Interceptor: Bagian ini adalah "keajaibannya"
+// Kode ini akan berjalan sebelum setiap request dikirim
 apiClient.interceptors.request.use(config => {
     // Ambil token dari localStorage
-    const token = localStorage.getItem('auth_token');
+    const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+
     if (token) {
         // Jika ada token, tambahkan ke header Authorization
         config.headers.Authorization = `Bearer ${token}`;

@@ -9,45 +9,44 @@ use App\Models\User;
 
 class AuthController extends Controller
 {
-    /**
-     * Menangani permintaan login.
-     */
     public function login(Request $request)
     {
-        // Validasi input: nim_nip dan password wajib diisi
         $credentials = $request->validate([
             'nim_nip' => 'required|string',
             'password' => 'required'
         ]);
 
-        // Mencoba otentikasi
         if (Auth::attempt($credentials)) {
             $user = $request->user();
-            $user->tokens()->delete(); // Hapus token lama
-            $token = $user->createToken('auth_token')->plainTextToken; // Buat token baru
+            $user->tokens()->delete();
+            $token = $user->createToken('auth_token')->plainTextToken;
 
-            // Kirim response sukses
             return response()->json([
                 'message' => 'Login successful',
                 'access_token' => $token,
                 'user' => $user
             ]);
         }
-
-        // Kirim response gagal
         return response()->json(['message' => 'NIM/NIP atau password salah'], 401);
     }
 
-    public function logout(Request $request)
+    /**
+     * Menangani permintaan logout dengan metode yang lebih aman.
+     */
+    public function logout()
     {
-        // Menghapus token otentikasi yang sedang digunakan
-        $request->user()->currentAccessToken()->delete();
+        // Ambil user yang sedang login secara eksplisit melalui guard 'sanctum'
+        $user = Auth::guard('sanctum')->user();
 
-        // Mengirim response sukses
-        return response()->json([
-            'message' => 'Logout successful'
-        ]);
+        // Penjaga: Pastikan user benar-benar ada sebelum melakukan apapun
+        if ($user) {
+            // Hapus token yang sedang digunakan untuk request ini
+            $user->currentAccessToken()->delete();
+
+            return response()->json(['message' => 'Logout successful']);
+        }
+
+        // Jika karena alasan aneh user tidak ditemukan, kirim response error yang benar
+        return response()->json(['message' => 'Unauthenticated.'], 401);
     }
-
-    // Fungsi untuk register dan logout akan kita tambahkan nanti
 }
