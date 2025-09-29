@@ -1,11 +1,12 @@
-// src/contexts/AuthContext.tsx
 'use client';
 
 import apiClient from '@/lib/api';
 import { useRouter } from 'next/navigation';
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { User } from '@/types'; // <-- 1. Impor User dari file terpusat
 
-interface User { name: string; /* ...properti user lainnya... */ }
+// 2. Definisi interface User, Prodi, dan Role yang lama DIHAPUS dari sini
+
 interface AuthContextType {
     user: User | null;
     isLoading: boolean;
@@ -27,16 +28,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setUser(JSON.parse(userData));
         }
         setIsLoading(false);
-
-        const handleStorageChange = (event: StorageEvent) => {
-            if (event.key === 'auth_token' && !event.newValue) {
-                setUser(null);
-                router.push('/login');
-            }
-        };
-        window.addEventListener('storage', handleStorageChange);
-        return () => window.removeEventListener('storage', handleStorageChange);
-    }, [router]);
+    }, []);
 
     const login = async (nim_nip: string, password: string) => {
         const response = await apiClient.post('/login', { nim_nip, password });
@@ -59,6 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     const value = { user, isLoading, login, logout };
+
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 

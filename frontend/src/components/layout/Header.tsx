@@ -19,7 +19,7 @@ export function Header() {
     const { user, logout } = useAuthContext();
 
     return (
-        <header className="h-16 bg-blue-600 text-white flex items-center justify-between px-6 z-10 shadow-md">
+        <header className="h-16 bg-primary text-primary-foreground flex items-center justify-between px-6 z-10 shadow-md">
             <div className="flex items-center space-x-3">
                 <Image
                     src="/UINdanBLU.png"

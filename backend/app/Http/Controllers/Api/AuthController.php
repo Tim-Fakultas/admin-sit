@@ -21,6 +21,8 @@ class AuthController extends Controller
             $user->tokens()->delete();
             $token = $user->createToken('auth_token')->plainTextToken;
 
+            $user->load('prodi', 'role');
+
             return response()->json([
                 'message' => 'Login successful',
                 'access_token' => $token,

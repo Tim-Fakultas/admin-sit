@@ -33,22 +33,28 @@ class WorkflowSeeder extends Seeder
 
         // 3. Mendefinisikan langkah-langkah persetujuan sesuai urutan
         $workflowSuratAktif->steps()->createMany([
-            ['role_id' => $roleBagianUmum->id, 'step' => 1], // Langkah 2 Anda: Verifikasi oleh Bagian Umum
-            ['role_id' => $roleApkapbn->id,    'step' => 2], // Langkah 3 Anda: Proses oleh APKAPBN
-            ['role_id' => $roleKabagTu->id,    'step' => 3], // Langkah 4 Anda: Paraf oleh Kabag TU
-            ['role_id' => $roleWadek1->id,     'step' => 4], // Langkah 5 Anda: Paraf oleh Wakil Dekan
-            ['role_id' => $roleDekan->id,      'step' => 5], // Langkah 6 Anda: Tanda tangan oleh Dekan
+            ['role_id' => $roleBagianUmum->id, 'step' => 1],
+            ['role_id' => $roleApkapbn->id,    'step' => 2],
+            ['role_id' => $roleKabagTu->id,    'step' => 3],
+            ['role_id' => $roleWadek1->id,     'step' => 4],
+            ['role_id' => $roleDekan->id,      'step' => 5],
         ]);
 
         // 4. Membuat Jenis Surat dan menghubungkannya ke alur kerja ini
+        //    LENGKAP DENGAN SYARAT-SYARATNYA
         JenisSurat::create([
             'name' => 'Surat Keterangan Aktif Kuliah',
             'description' => 'Surat untuk menyatakan bahwa mahasiswa masih aktif kuliah.',
             'workflow_id' => $workflowSuratAktif->id,
+            'required_fields' => json_encode([
+                'files' => [
+                    ['label' => 'Copy KTM Masih Berlaku', 'name' => 'file_ktm'],
+                    ['label' => 'Kartu Keluarga', 'name' => 'file_kk'],
+                    ['label' => 'Copy Bukti Pembayaran SPP/UKT Semester berjalan', 'name' => 'file_spp'],
+                ]
+            ]),
         ]);
 
         $this->command->info('Workflow for Surat Aktif Kuliah has been seeded!');
-
-        // Anda bisa menambahkan definisi workflow untuk surat lain di bawah sini
     }
 }
