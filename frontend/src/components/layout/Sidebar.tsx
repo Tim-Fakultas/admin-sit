@@ -17,9 +17,10 @@ export default function Sidebar() {
     let navItems;
     if (user?.role?.slug === "bagian-umum") {
         navItems = [
+            { href: "/bagian-umum", icon: Home, label: "Dashboard" },
             { href: "/bagian-umum/ajuan-layanan", icon: FileText, label: "Ajuan Layanan" },
             { href: "/bagian-umum/ajuan-ditolak", icon: Files, label: "Ajuan Ditolak" },
-            { href: "/bagian-umum/ajuan-aktif", icon: Home, label: "Ajuan Aktif" },
+            { href: "/bagian-umum/ajuan-aktif", icon: Files, label: "Ajuan Aktif" },
         ];
     } else {
         const dashboardHref = "/dashboard";

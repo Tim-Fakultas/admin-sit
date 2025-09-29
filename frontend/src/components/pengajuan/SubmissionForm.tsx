@@ -28,7 +28,42 @@ export function SubmissionForm({ jenisSurat }: { jenisSurat: JenisSurat }) {
     };
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        // ... fungsi handleSubmit tidak berubah ...
+        e.preventDefault();
+        setIsLoading(true);
+        setErrors({});
+
+        try {
+            const formData = new FormData();
+            formData.append('jenis_surat_id', String(jenisSurat.id));
+            formData.append('keterangan', keterangan);
+
+            // Pastikan nama field file sesuai validasi backend
+            if (jenisSurat.required_fields?.files) {
+                jenisSurat.required_fields.files.forEach((field: FileRequirement) => {
+                    if (files[field.name]) {
+                        formData.append(`files[${field.name}]`, files[field.name]!);
+                    }
+                });
+            }
+
+            const token = typeof window !== "undefined" ? localStorage.getItem("token") : "";
+            await apiClient.post('/surat', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    'Authorization': `Bearer ${token}`,
+                },
+            });
+
+            router.replace('/daftar-ajuan');
+        } catch (err: any) {
+            if (err.response?.data?.errors) {
+                setErrors(err.response.data.errors);
+            } else {
+                alert('Terjadi kesalahan saat mengirim pengajuan.');
+            }
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (

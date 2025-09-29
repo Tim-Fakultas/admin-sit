@@ -59,4 +59,43 @@ class SuratController extends Controller
         $surats = Surat::with('user')->orderBy('created_at', 'desc')->get();
         return response()->json($surats);
     }
+
+    public function show($id)
+    {
+        $surat = Surat::with(['user', 'jenisSurat', 'lampiran'])->findOrFail($id);
+        return response()->json($surat);
+    }
+
+    public function paraf($id)
+    {
+        $surat = Surat::findOrFail($id);
+        // Lanjut ke workflow berikutnya
+        $currentStep = WorkflowStep::where('workflow_id', $surat->jenis_surat_id)
+            ->where('role_id', $surat->penanggung_jawab_role_id)
+            ->first();
+        $nextStep = WorkflowStep::where('workflow_id', $surat->jenis_surat_id)
+            ->where('step', '>', $currentStep->step)
+            ->orderBy('step')
+            ->first();
+        if ($nextStep) {
+            $surat->penanggung_jawab_role_id = $nextStep->role_id;
+            $surat->status = 'diajukan';
+        } else {
+            $surat->status = 'disetujui';
+        }
+        $surat->save();
+        return response()->json(['message' => 'Surat diparaf dan lanjut workflow.', 'surat' => $surat]);
+    }
+
+    public function tolak($id, Request $request)
+    {
+        $request->validate([
+            'catatan' => 'required|string',
+        ]);
+        $surat = Surat::findOrFail($id);
+        $surat->status = 'ditolak';
+        $surat->catatan_revisi = $request->catatan;
+        $surat->save();
+        return response()->json(['message' => 'Surat ditolak.', 'surat' => $surat]);
+    }
 }

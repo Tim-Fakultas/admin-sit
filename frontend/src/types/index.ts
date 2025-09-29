@@ -42,3 +42,20 @@ export interface JenisSurat {
     };
     // properti lain sesuai kebutuhan
 }
+
+export interface Lampiran {
+  id: number;
+  file_name: string;
+  file_path: string;
+}
+
+export interface SuratDetail {
+  id: number;
+  status: string;
+  form_data: {
+    keterangan: string;
+  };
+  user: User; // User yang mengajukan
+  jenis_surat: JenisSurat;
+  lampiran: Lampiran[];
+}

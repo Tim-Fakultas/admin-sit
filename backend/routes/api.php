@@ -1,26 +1,43 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\JenisSuratController;
 use App\Http\Controllers\Api\SuratController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
+/*
+|--------------------------------------------------------------------------
+| API Routes
+|--------------------------------------------------------------------------
+*/
 
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
-
+// == Rute Publik (Tidak Perlu Login) ==
 Route::post('/login', [AuthController::class, 'login']);
 
-Route::post('/logout', [AuthController::class, 'logout']);
 
-Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
+// == Rute Terlindungi (Wajib Login & Kirim Token) ==
+Route::middleware('auth:sanctum')->group(function () {
+    
+    // Rute Otentikasi
+    Route::get('/user', function (Request $request) {
+        return $request->user();
+    });
+    Route::post('/logout', [AuthController::class, 'logout']);
 
-// Rute untuk Pengajuan Surat
-Route::get('/jenis-surat', [JenisSuratController::class, 'index']);
-Route::get('/jenis-surat/{jenisSurat}', [JenisSuratController::class, 'show']);
-Route::post('/surat', [SuratController::class, 'store']);
-Route::get('/surat', [SuratController::class, 'index']);
+    // Rute Dashboard
+    Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
 
+    // Rute Jenis Surat
+    Route::get('/jenis-surat', [JenisSuratController::class, 'index']);
+    Route::get('/jenis-surat/{jenisSurat}', [JenisSuratController::class, 'show']);
+
+    // Rute Surat (CRUD & Aksi)
+    Route::get('/surat', [SuratController::class, 'index']);
+    Route::post('/surat', [SuratController::class, 'store']);
+    Route::get('/surat/{id}', [SuratController::class, 'show']);
+    Route::put('/surat/{id}/paraf', [SuratController::class, 'paraf']);
+    Route::put('/surat/{id}/tolok', [SuratController::class, 'tolak']); 
+    
+});

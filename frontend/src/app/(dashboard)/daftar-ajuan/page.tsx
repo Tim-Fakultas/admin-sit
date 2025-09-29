@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import apiClient from "@/lib/api";
+import { useAuthContext } from "@/contexts/AuthContext";
 
 type Pengajuan = {
   id: number;
@@ -16,12 +17,18 @@ export default function DaftarAjuanPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const { user } = useAuthContext();
+
   useEffect(() => {
     apiClient.get("/surat")
-      .then(res => setData(res.data))
+      .then(res => {
+        // Filter hanya surat milik user yang sedang login
+        const filtered = res.data.filter((ajuan: Pengajuan) => ajuan.user?.nim_nip === user?.nim_nip);
+        setData(filtered);
+      })
       .catch(() => setError("Gagal memuat data pengajuan."))
       .finally(() => setIsLoading(false));
-  }, []);
+  }, [user]);
 
   if (isLoading) return <div className="text-center p-10">Loading...</div>;
   if (error) return <div className="text-center p-10 text-red-500">{error}</div>;

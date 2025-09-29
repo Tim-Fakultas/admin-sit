@@ -12,10 +12,13 @@ class Lampiran extends Model
 
     protected $table = 'lampirans';
 
+    protected $fillable = ['file_name', 'file_path', 'surat_id'];
+
+
     /**
      * Get the surat that owns the Lampiran
      */
-    public function surat()
+    public function surat() 
     {
         return $this->belongsTo(Surat::class);
     }
