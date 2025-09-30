@@ -80,7 +80,7 @@
         <tr>
             <td class="label">J a b a t a n</td>
             <td class="separator">:</td>
-            <td>Dekan Fakultas Sains dan Teknologi<br>UIN Sunan Kalijaga Yogyakarta</td>
+            <td>Dekan Fakultas Sains dan Teknologi<br>UIN Raden Fatah Palembang</td>
         </tr>
     </table>
 
@@ -119,7 +119,7 @@
     <p class="closing-section">Demikianlah surat ini dibuat dengan sesungguhnya untuk dapat dipergunakan sebagaimana mestinya.</p>
 
     <div class="signature-section">
-        Yogyakarta, {{ date('d F Y') }}<br>
+        Palembang, {{ date('d F Y') }}<br>
         Dekan,
         <div class="signature-name">
             Muhammad Isnaini

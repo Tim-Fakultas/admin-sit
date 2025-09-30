@@ -49,6 +49,14 @@ export interface Lampiran {
   file_path: string;
 }
 
+export interface UserContext {
+  role: string;
+  can_paraf: boolean;
+  can_tolak: boolean;
+  show_pdf_only: boolean;
+  show_form_data: boolean;
+}
+
 export interface SuratDetail {
   id: number;
   status: string;
@@ -59,4 +67,5 @@ export interface SuratDetail {
   jenis_surat: JenisSurat;
   lampiran: Lampiran[];
   file_path?: string;
+  user_context?: UserContext;
 }

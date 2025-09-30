@@ -2,8 +2,18 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { SuratDetail } from "@/types";
 
-export function DetailLampiran({ data }: { data: SuratDetail }) {
+interface DetailLampiranProps {
+  data: SuratDetail;
+  showFormData?: boolean;
+}
+
+export function DetailLampiran({ data, showFormData = true }: DetailLampiranProps) {
   const storageUrl = process.env.NEXT_PUBLIC_BACKEND_URL?.replace('/api', '/storage') || 'http://localhost:8000/storage';
+
+  // Jika showFormData false, jangan render apa-apa
+  if (!showFormData) {
+    return null;
+  }
 
   return (
     <Card>
