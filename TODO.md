@@ -1,0 +1,2 @@
+- [ ] Modifikasi DetailLampiran.tsx untuk menampilkan gambar lampiran langsung menggunakan tag img jika ekstensi file adalah gambar (png, jpg, jpeg), jika tidak tetap link.
+- [ ] Jalankan aplikasi dan periksa apakah gambar ditampilkan dengan benar.

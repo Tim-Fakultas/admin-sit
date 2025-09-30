@@ -24,11 +24,11 @@ export function DetailLampiran({ data }: { data: SuratDetail }) {
           <h4 className="font-medium mb-2">Lampiran Syarat</h4>
           <ul className="list-disc pl-5 space-y-2">
             {data.lampiran?.length > 0 ? data.lampiran.map(file => {
-              const fileName = file.file_path.split("/").pop();
+              const fileUrl = file.file_path.replace('public/', '');
               return (
                 <li key={file.id}>
                   <span className="font-semibold">{file.file_name}: </span>
-                  <a href={`${storageUrl}/${fileName}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
+                  <a href={`${storageUrl}/${fileUrl}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
                     Lihat File
                   </a>
                 </li>
