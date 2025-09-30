@@ -1,79 +1,67 @@
 "use client";
-import { useEffect, useState } from "react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import apiClient from "@/lib/api";
+
 import { useAuthContext } from "@/contexts/AuthContext";
+import { useApiData } from "@/hooks/useApi";
+import { DataTable } from "@/components/common/DataTable";
+import { StatusBadge } from "@/components/common/StatusBadge";
+import { PageLayout } from "@/components/layout/PageLayout";
+import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 
 type Pengajuan = {
   id: number;
   user?: { name: string; nim_nip: string };
   status: string;
   created_at: string;
+  penanggung_jawab_role_id?: number;
 };
 
 export default function DaftarAjuanPage() {
-  const [data, setData] = useState<Pengajuan[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState("");
-
   const { user } = useAuthContext();
+  const router = useRouter();
 
-  useEffect(() => {
-    apiClient.get("/surat")
-      .then(res => {
-        let filtered;
-        if (user?.role?.slug === 'mahasiswa') {
-          // Mahasiswa melihat surat miliknya sendiri
-          filtered = res.data.filter((ajuan: Pengajuan) => ajuan.user?.nim_nip === user?.nim_nip);
-        } else {
-          // Officer melihat surat yang ditugaskan kepadanya
-          filtered = res.data.filter((ajuan: any) => ajuan.penanggung_jawab_role_id === user?.role?.id);
-        }
-        setData(filtered);
-      })
-      .catch(() => setError("Gagal memuat data pengajuan."))
-      .finally(() => setIsLoading(false));
-  }, [user]);
+  const { data, isLoading, error, refetch } = useApiData<Pengajuan[]>({
+    endpoint: "/surat"
+  });
 
-  if (isLoading) return <div className="text-center p-10">Loading...</div>;
-  if (error) return <div className="text-center p-10 text-red-500">{error}</div>;
+  const columns = [
+    { 
+      header: 'Nama', 
+      accessor: (item: Pengajuan) => item.user?.name || '-' 
+    },
+    { 
+      header: 'NIM', 
+      accessor: (item: Pengajuan) => item.user?.nim_nip || '-' 
+    },
+    { 
+      header: 'Status', 
+      accessor: (item: Pengajuan) => <StatusBadge status={item.status} size="sm" /> 
+    },
+    { 
+      header: 'Tanggal Pengajuan', 
+      accessor: (item: Pengajuan) => new Date(item.created_at).toLocaleDateString('id-ID') 
+    }
+  ];
 
   return (
-    <div className="container mx-auto py-8">
-      <Card>
-        <CardHeader>
-          <CardTitle>Daftar Pengajuan Mahasiswa</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <table className="min-w-full table-auto border">
-            <thead>
-              <tr className="bg-gray-100">
-                <th className="px-2 py-2">No</th>
-                <th className="px-2 py-2">Nama</th>
-                <th className="px-2 py-2">NIM</th>
-                <th className="px-2 py-2">Status</th>
-                <th className="px-2 py-2">Tanggal Pengajuan</th>
-                <th className="px-2 py-2">Tools</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.map((ajuan, idx) => (
-                <tr key={ajuan.id} className="border-b">
-                  <td className="px-2 py-2">{idx + 1}</td>
-                  <td className="px-2 py-2">{ajuan.user?.name}</td>
-                  <td className="px-2 py-2">{ajuan.user?.nim_nip}</td>
-                  <td className="px-2 py-2">{ajuan.status}</td>
-                  <td className="px-2 py-2">{ajuan.created_at}</td>
-                  <td className="px-2 py-2">
-                    <Button size="sm" variant="outline" onClick={() => window.location.href = `/daftar-ajuan/${ajuan.id}`}>Detail</Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </CardContent>
-      </Card>
-    </div>
+    <PageLayout title="Daftar Pengajuan Mahasiswa">
+      <DataTable 
+        data={data || []}
+        columns={columns}
+        isLoading={isLoading}
+        error={error}
+        onRetry={refetch}
+        emptyMessage="Belum ada pengajuan"
+        actions={(item) => (
+          <Button 
+            size="sm" 
+            variant="outline"
+            onClick={() => router.push(`/daftar-ajuan/${item.id}`)}
+          >
+            Detail
+          </Button>
+        )}
+      />
+    </PageLayout>
   );
 }

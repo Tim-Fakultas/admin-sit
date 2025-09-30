@@ -1,7 +1,0 @@
-- [x] Update SuratController.php: In paraf, when status becomes 'disetujui', generate PDF letter.
-- [x] Add role check in tolak: Only 'bagian_umum' and 'kabag_tu' can reject.
-- [x] Implement handleParaf and handleTolak in AksiPejabat.tsx: Call API endpoints.
-- [x] Modify detail view: For officers not 'bagian_umum', if status 'disetujui', show PDF instead of form data.
-- [x] Ensure sidebars are consistent (check Sidebar.tsx).
-- [x] When dekan approves, generate PDF and make it visible to mahasiswa.
-- [x] Test workflow end-to-end.

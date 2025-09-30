@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useAuthContext } from '@/contexts/AuthContext';
+import { useApiSubmit } from '@/hooks/useApi';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from "@/components/ui/button";
@@ -9,36 +10,24 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from '@/components/ui/checkbox';
-import axios from 'axios';
 
 export function LoginForm() {
     // Mengambil fungsi login dari context global
     const { login } = useAuthContext();
+    const { submit, isLoading, error } = useApiSubmit();
 
-    // State untuk menyimpan nilai input, pesan error, dan status loading
+    // State untuk menyimpan nilai input
     const [nimNip, setNimNip] = useState('');
     const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
 
     // Fungsi yang dijalankan saat tombol login ditekan
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        setIsLoading(true);
-        setError('');
-        try {
+        
+        await submit(async () => {
             // Memanggil fungsi login dari AuthContext
             await login(nimNip, password);
-        } catch (err: unknown) {
-            // Menangani error jika login gagal
-            if (axios.isAxiosError(err) && err.response) {
-                setError(err.response.data.message || 'Terjadi kesalahan.');
-            } else {
-                setError('Terjadi kesalahan yang tidak terduga.');
-            }
-        } finally {
-            setIsLoading(false);
-        }
+        });
     };
 
     return (
@@ -90,7 +79,11 @@ export function LoginForm() {
                             Lupa kata sandi?
                         </Link>
                     </div>
-                    {error && <p className="text-sm text-red-500 text-center">{error}</p>}
+                    {error && (
+                        <div className="p-3 text-sm text-red-800 bg-red-100 border border-red-200 rounded-md text-center">
+                            {error}
+                        </div>
+                    )}
                     <Button type="submit" className="w-full h-12 text-md" disabled={isLoading}>
                         {isLoading ? 'Loading...' : 'Masuk'}
                     </Button>

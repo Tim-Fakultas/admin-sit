@@ -2,24 +2,24 @@
 
 import { useState } from "react";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"; // <-- Tambahkan CardDescription
+import { useApiSubmit } from "@/hooks/useApi";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import apiClient from "@/lib/api";
 import { useRouter } from "next/navigation";
-import axios from "axios";
 import type { JenisSurat, FileRequirement } from "@/types";
-
 
 export function SubmissionForm({ jenisSurat }: { jenisSurat: JenisSurat }) {
     const { user } = useAuthContext();
     const router = useRouter();
     const [keterangan, setKeterangan] = useState("");
     const [files, setFiles] = useState<{ [key: string]: File | null }>({});
-    const [isLoading, setIsLoading] = useState(false);
     const [errors, setErrors] = useState<{ [key: string]: string[] }>({});
+    
+    const { submit, isLoading, error } = useApiSubmit();
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
@@ -29,45 +29,49 @@ export function SubmissionForm({ jenisSurat }: { jenisSurat: JenisSurat }) {
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        setIsLoading(true);
         setErrors({});
 
         try {
-            const formData = new FormData();
-            formData.append('jenis_surat_id', String(jenisSurat.id));
-            formData.append('keterangan', keterangan);
+            await submit(async () => {
+                const formData = new FormData();
+                formData.append('jenis_surat_id', String(jenisSurat.id));
+                formData.append('keterangan', keterangan);
 
-            // Pastikan nama field file sesuai validasi backend
-            if (jenisSurat.required_fields?.files) {
-                jenisSurat.required_fields.files.forEach((field: FileRequirement) => {
-                    if (files[field.name]) {
-                        formData.append(`files[${field.name}]`, files[field.name]!);
-                    }
+                // Pastikan nama field file sesuai validasi backend
+                if (jenisSurat.required_fields?.files) {
+                    jenisSurat.required_fields.files.forEach((field: FileRequirement) => {
+                        if (files[field.name]) {
+                            formData.append(`files[${field.name}]`, files[field.name]!);
+                        }
+                    });
+                }
+
+                const token = typeof window !== "undefined" ? localStorage.getItem("token") : "";
+                return await apiClient.post('/surat', formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        'Authorization': `Bearer ${token}`,
+                    },
                 });
-            }
-
-            const token = typeof window !== "undefined" ? localStorage.getItem("token") : "";
-            await apiClient.post('/surat', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                    'Authorization': `Bearer ${token}`,
-                },
             });
 
+            // Success - redirect to daftar ajuan
             router.replace('/daftar-ajuan');
         } catch (err: any) {
             if (err.response?.data?.errors) {
                 setErrors(err.response.data.errors);
-            } else {
-                alert('Terjadi kesalahan saat mengirim pengajuan.');
             }
-        } finally {
-            setIsLoading(false);
         }
     };
 
     return (
         <form onSubmit={handleSubmit}>
+            {error && (
+                <div className="mb-4 p-4 text-sm text-red-800 bg-red-100 border border-red-200 rounded-md">
+                    {error}
+                </div>
+            )}
+            
             <div className="grid md:grid-cols-2 gap-8">
                 {/* ========================================================== */}
                 {/* LENGKAPI BAGIAN KARTU INI */}
@@ -115,13 +119,29 @@ export function SubmissionForm({ jenisSurat }: { jenisSurat: JenisSurat }) {
                     <CardContent className="space-y-4">
                         <div>
                             <Label htmlFor="keterangan">Keterangan</Label>
-                            <Textarea id="keterangan" value={keterangan} onChange={(e) => setKeterangan(e.target.value)} placeholder="Tuliskan tujuan pengajuan Anda..." />
+                            <Textarea 
+                                id="keterangan" 
+                                value={keterangan} 
+                                onChange={(e) => setKeterangan(e.target.value)} 
+                                placeholder="Tuliskan tujuan pengajuan Anda..." 
+                            />
+                            {errors?.keterangan && (
+                                <p className="text-sm text-red-500 mt-1">{errors.keterangan[0]}</p>
+                            )}
                         </div>
                         {jenisSurat.required_fields?.files?.map((field: FileRequirement) => (
                             <div key={field.name}>
                                 <Label htmlFor={field.name}>{field.label}</Label>
-                                <Input id={field.name} name={field.name} type="file" required onChange={handleFileChange} />
-                                {errors?.[`files.${field.name}`] && <p className="text-sm text-red-500 mt-1">{errors[`files.${field.name}`][0]}</p>}
+                                <Input 
+                                    id={field.name} 
+                                    name={field.name} 
+                                    type="file" 
+                                    required 
+                                    onChange={handleFileChange} 
+                                />
+                                {errors?.[`files.${field.name}`] && (
+                                    <p className="text-sm text-red-500 mt-1">{errors[`files.${field.name}`][0]}</p>
+                                )}
                                 <p className="text-xs text-muted-foreground mt-1">Tipe file: PDF, JPG, PNG. Maks: 3MB.</p>
                             </div>
                         ))}
@@ -129,7 +149,9 @@ export function SubmissionForm({ jenisSurat }: { jenisSurat: JenisSurat }) {
                 </Card>
             </div>
             <div className="mt-6 flex justify-end space-x-2">
-                <Button variant="outline" type="button" onClick={() => router.back()}>Batal</Button>
+                <Button variant="outline" type="button" onClick={() => router.back()}>
+                    Batal
+                </Button>
                 <Button type="submit" disabled={isLoading}>
                     {isLoading ? 'Mengirim...' : 'Kirim Pengajuan'}
                 </Button>
