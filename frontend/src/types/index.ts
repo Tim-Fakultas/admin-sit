@@ -58,4 +58,5 @@ export interface SuratDetail {
   user: User; // User yang mengajukan
   jenis_surat: JenisSurat;
   lampiran: Lampiran[];
+  file_path?: string;
 }

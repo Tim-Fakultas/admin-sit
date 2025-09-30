@@ -15,18 +15,16 @@ export default function Sidebar() {
     const { user } = useAuthContext();
 
     let navItems;
-    if (user?.role?.slug === "bagian-umum") {
+    if (user?.role?.slug === "mahasiswa") {
         navItems = [
-            { href: "/bagian-umum", icon: Home, label: "Dashboard" },
-            { href: "/bagian-umum/ajuan-layanan", icon: FileText, label: "Ajuan Layanan" },
-            { href: "/bagian-umum/ajuan-ditolak", icon: Files, label: "Ajuan Ditolak" },
-            { href: "/bagian-umum/ajuan-aktif", icon: Files, label: "Ajuan Aktif" },
+            { href: "/dashboard", icon: Home, label: "Dashboard" },
+            { href: "/pengajuan", icon: FileText, label: "Pengajuan Layanan" },
+            { href: "/daftar-ajuan", icon: Files, label: "Daftar Ajuan" },
         ];
     } else {
-        const dashboardHref = "/dashboard";
+        // Officer nav
         navItems = [
-            { href: dashboardHref, icon: Home, label: "Dashboard" },
-            { href: "/pengajuan", icon: FileText, label: "Pengajuan Layanan" },
+            { href: "/dashboard", icon: Home, label: "Dashboard" },
             { href: "/daftar-ajuan", icon: Files, label: "Daftar Ajuan" },
         ];
     }

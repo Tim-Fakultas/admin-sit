@@ -38,6 +38,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/surat', [SuratController::class, 'store']);
     Route::get('/surat/{id}', [SuratController::class, 'show']);
     Route::put('/surat/{id}/paraf', [SuratController::class, 'paraf']);
-    Route::put('/surat/{id}/tolok', [SuratController::class, 'tolak']); 
+    Route::put('/surat/{id}/tolak', [SuratController::class, 'tolak']);
+    
     
 });

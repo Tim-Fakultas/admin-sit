@@ -8,6 +8,7 @@ use App\Models\Surat;
 use App\Models\WorkflowStep;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class SuratController extends Controller
 {
@@ -68,12 +69,12 @@ class SuratController extends Controller
 
     public function paraf($id)
     {
-        $surat = Surat::findOrFail($id);
+        $surat = Surat::with(['user.prodi', 'jenisSurat'])->findOrFail($id);
         // Lanjut ke workflow berikutnya
-        $currentStep = WorkflowStep::where('workflow_id', $surat->jenis_surat_id)
+        $currentStep = WorkflowStep::where('workflow_id', $surat->jenisSurat->workflow_id)
             ->where('role_id', $surat->penanggung_jawab_role_id)
             ->first();
-        $nextStep = WorkflowStep::where('workflow_id', $surat->jenis_surat_id)
+        $nextStep = WorkflowStep::where('workflow_id', $surat->jenisSurat->workflow_id)
             ->where('step', '>', $currentStep->step)
             ->orderBy('step')
             ->first();
@@ -82,6 +83,18 @@ class SuratController extends Controller
             $surat->status = 'diajukan';
         } else {
             $surat->status = 'disetujui';
+        }
+        if ($currentStep->step === 1 || !$nextStep) {
+            // Generate nomor surat if not set
+            if (!$surat->nomor_surat) {
+                $surat->nomor_surat = 'B-' . $surat->id . '/Un.09/PP.07/VIII.2/09/' . date('Y');
+            }
+            // Generate PDF
+            $pdf = Pdf::loadView('surat', compact('surat'));
+            $fileName = 'surat_' . $surat->id . '.pdf';
+            $path = 'public/surat/' . $fileName;
+            $pdf->save(storage_path('app/' . $path));
+            $surat->file_path = $path;
         }
         $surat->save();
         return response()->json(['message' => 'Surat diparaf dan lanjut workflow.', 'surat' => $surat]);
@@ -92,6 +105,10 @@ class SuratController extends Controller
         $request->validate([
             'catatan' => 'required|string',
         ]);
+        $user = Auth::user();
+        if (!in_array($user->role->nama, ['bagian_umum', 'kabag_tu', 'wakil_dekan'])) {
+            return response()->json(['message' => 'Anda tidak memiliki izin untuk menolak surat.'], 403);
+        }
         $surat = Surat::findOrFail($id);
         $surat->status = 'ditolak';
         $surat->catatan_revisi = $request->catatan;

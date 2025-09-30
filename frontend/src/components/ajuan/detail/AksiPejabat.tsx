@@ -7,25 +7,45 @@ import { Textarea } from "@/components/ui/textarea";
 import apiClient from "@/lib/api";
 import { useRouter } from "next/navigation";
 
-export function AksiPejabat({ suratId }: { suratId: number }) {
+export function AksiPejabat({ suratId, userRole }: { suratId: number; userRole?: string }) {
   const router = useRouter();
   const [catatan, setCatatan] = useState("");
   const [showCatatan, setShowCatatan] = useState(false);
 
   const handleParaf = async () => {
-    // ... (fungsi handleParaf) ...
+    try {
+      await apiClient.put(`/surat/${suratId}/paraf`);
+      alert('Surat berhasil diparaf.');
+      router.refresh();
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Gagal memparaf surat.');
+    }
   };
   const handleTolak = async () => {
-    // ... (fungsi handleTolak) ...
+    try {
+      await apiClient.put(`/surat/${suratId}/tolak`, { catatan });
+      alert('Surat berhasil ditolak.');
+      setShowCatatan(false);
+      setCatatan('');
+      router.refresh();
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Gagal menolak surat.');
+    }
   };
+
+  const canReject = userRole === 'bagian_umum' || userRole === 'kabag_tu' || userRole === 'wakil_dekan';
 
   return (
     <div className="mt-6">
       <div className="flex gap-2">
         <Button onClick={handleParaf}>Paraf & Lanjutkan</Button>
-        <Button variant="destructive" onClick={() => setShowCatatan(!showCatatan)}>
-          Tolak / Minta Perbaikan
-        </Button>
+        {canReject && (
+          <Button variant="destructive" onClick={() => setShowCatatan(!showCatatan)}>
+            Tolak / Minta Perbaikan
+          </Button>
+        )}
         <Button variant="outline" onClick={() => router.back()}>Kembali</Button>
       </div>
       {showCatatan && (

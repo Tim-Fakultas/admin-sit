@@ -22,8 +22,14 @@ export default function DaftarAjuanPage() {
   useEffect(() => {
     apiClient.get("/surat")
       .then(res => {
-        // Filter hanya surat milik user yang sedang login
-        const filtered = res.data.filter((ajuan: Pengajuan) => ajuan.user?.nim_nip === user?.nim_nip);
+        let filtered;
+        if (user?.role?.slug === 'mahasiswa') {
+          // Mahasiswa melihat surat miliknya sendiri
+          filtered = res.data.filter((ajuan: Pengajuan) => ajuan.user?.nim_nip === user?.nim_nip);
+        } else {
+          // Officer melihat surat yang ditugaskan kepadanya
+          filtered = res.data.filter((ajuan: any) => ajuan.penanggung_jawab_role_id === user?.role?.id);
+        }
         setData(filtered);
       })
       .catch(() => setError("Gagal memuat data pengajuan."))
@@ -60,7 +66,7 @@ export default function DaftarAjuanPage() {
                   <td className="px-2 py-2">{ajuan.status}</td>
                   <td className="px-2 py-2">{ajuan.created_at}</td>
                   <td className="px-2 py-2">
-                    <Button size="sm" variant="outline">Detail</Button>
+                    <Button size="sm" variant="outline" onClick={() => window.location.href = `/daftar-ajuan/${ajuan.id}`}>Detail</Button>
                   </td>
                 </tr>
               ))}
