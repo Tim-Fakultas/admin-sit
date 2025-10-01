@@ -7,6 +7,8 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FilePlus2, CheckCircle2, XCircle, RefreshCw, Clock } from "lucide-react";
 import { LoadingState, ErrorState } from "@/components/common/States";
+import { DashboardStats } from "@/types";
+import { ROLES } from "@/lib/config";
 
 interface StatsData {
   total_pengajuan: number;
@@ -43,12 +45,14 @@ function StatCard({ title, value, icon: Icon, bgColor }: {
 export default function DashboardPage() {
   const { user, isLoading: isAuthLoading } = useAuthContext();
   const router = useRouter();
-  const { data: stats, isLoading, error } = useApiData<StatsData>({ endpoint: '/dashboard/stats' });
+  const { data: stats, isLoading, error } = useApiData<DashboardStats>({
+    endpoint: '/dashboard/stats'
+  });
 
   useEffect(() => {
-    // Redirect berdasarkan role
+    // Redirect berdasarkan role dengan type safety
     if (!isAuthLoading && user) {
-      if (user.role.slug === "bagian-umum") {
+      if (user.role.slug === ROLES.BAGIAN_UMUM) {
         router.replace("/bagian-umum");
       }
       // Tambah role lain jika perlu
@@ -56,7 +60,7 @@ export default function DashboardPage() {
   }, [user, isAuthLoading, router]);
 
   // Jangan render dashboard jika bagian-umum, tunggu redirect
-  if (!isAuthLoading && user?.role?.slug === "bagian-umum") {
+  if (!isAuthLoading && user?.role?.slug === ROLES.BAGIAN_UMUM) {
     return null;
   }
 
