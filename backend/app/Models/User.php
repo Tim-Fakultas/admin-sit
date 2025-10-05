@@ -70,4 +70,22 @@ class User extends Authenticatable
         return $this->hasMany(Surat::class);
     }
 
+    public function profile()
+    {
+        return $this->hasOne(UserProfile::class);
+    }
+
+    public function documents()
+    {
+        return $this->hasMany(UserDocument::class);
+    }
+
+    // Helper method untuk cek kelengkapan dokumen
+    public function hasRequiredDocuments()
+    {
+        $requiredDocs = ['ktm', 'kk', 'bukti_bayar_spp'];
+        $userDocs = $this->documents()->whereIn('document_type', $requiredDocs)->pluck('document_type')->toArray();
+        return count(array_intersect($requiredDocs, $userDocs)) === count($requiredDocs);
+    }
+
 }

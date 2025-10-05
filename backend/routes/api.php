@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\JenisSuratController;
 use App\Http\Controllers\Api\SuratController;
+use App\Http\Controllers\Api\ProfileController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -40,5 +41,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/surat/{id}/paraf', [SuratController::class, 'paraf']);
     Route::put('/surat/{id}/tolak', [SuratController::class, 'tolak']);
     
+    // Profile Routes  // <- TAMBAHKAN DARI SINI
+    Route::get('/profile', [ProfileController::class, 'show']);
+    Route::put('/profile', [ProfileController::class, 'updateProfile']);
+    Route::post('/profile/documents', [ProfileController::class, 'uploadDocument']);
+    Route::delete('/profile/documents/{documentType}', [ProfileController::class, 'deleteDocument']);
+    Route::get('/profile/documents/{documentType}/download', [ProfileController::class, 'downloadDocument']);
+    // <- SAMPAI SINI
     
 });
